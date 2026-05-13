@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Papa Bear's Little Lantern Cabin</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+--amber:#e8a838;
+--amber-glow:#f5c96a;
+--warm-gold:#d4943a;
+--deep-brown:#3a1f0a;
+--cabin-brown:#5a3520;
+--dark-night:#0a0e1a;
+--night-blue:#121830;
+--snow-white:#e8e4e0;
+--fire-orange:#e85a20;
+--fire-red:#c0392b;
+--soft-cream:#f5e6c8;
+--pine-green:#1a3a2a;
+--frost-blue:#8ab4d0;
+--lantern-warm:rgba(232,168,56,0.4);
+--text-dark:#2a1505;
+--text-light:#f0e0c8;
+--page-bg:#1a0e05;
+}
+
+html,body{
+width:100%;min-height:100%;overflow-x:hidden;
+font-family:'EB Garamond',serif;
+background:var(--dark-night);
+color:var(--text-light);
+}
+
+/* SNOW */
+#snow-canvas{
+position:fixed;top:0;left:0;width:100%;height:100%;
+pointer-events:none;z-index:1000;
+}
+
+/* GLOBAL TRANSITIONS */
+.scene{
+display:none;
+opacity:0;
+transition:opacity 1.2s ease;
+min-height:100vh;
+position:relative;
+}
+.scene.active{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.scene.visible{opacity:1;}
+
+/* ========== TITLE SCREEN ========== */
+#title-screen{
+background:linear-gradient(180deg,#0a0e1a 0%,#121830 40%,#1a2040 70%,#0d1525 100%);
+text-align:center;padding:2rem 1rem;
+}
+.title-cabin-wrapper{
+position:relative;width:min(500px,90vw);height:300px;margin:0 auto 2rem;
+}
+.title-cabin{
+position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+width:220px;height:160px;
+}
+.cabin-body{
+position:absolute;bottom:0;left:10px;right:10px;height:110px;
+background:linear-gradient(135deg,#4a2a15,#3a1f0a);
+border-radius:4px;
+box-shadow:0 4px 20px rgba(0,0,0,0.6);
+}
+.cabin-roof{
+position:absolute;bottom:100px;left:-15px;right:-15px;height:0;
+border-left:30px solid transparent;
+border-right:30px solid transparent;
+border-bottom:65px solid #2a1505;
+}
+.cabin-chimney{
+position:absolute;bottom:140px;right:30px;width:20px;height:40px;
+background:#3a1f0a;border-radius:2px 2px 0 0;
+}
+/* Windows with lantern glow */
+.cabin-window{
+position:absolute;bottom:35px;width:28px;height:32px;
+background:var(--amber);border-radius:3px;
+box-shadow:0 0 25px var(--amber),0 0 50px rgba(232,168,56,0.3);
+animation:lanternFlicker 3s ease-in-out infinite alternate;
+}
+.cabin-window.left{left:35px}
+.cabin-window.right{right:35px}
+.cabin-door{
+position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+width:30px;height:50px;background:#2a1505;border-radius:4px 4px 0 0;
+}
+
+@keyframes lanternFlicker{
+0%{box-shadow:0 0 25px var(--amber),0 0 50px rgba(232,168,56,0.3);opacity:0.9}
+25%{box-shadow:0 0 30px var(--amber),0 0 55px rgba(232,168,56,0.35);opacity:1}
+50%{box-shadow:0 0 22px var(--amber),0 0 45px rgba(232,168,56,0.25);opacity:0.85}
+75%{box-shadow:0 0 28px var(--amber),0 0 52px rgba(232,168,56,0.32);opacity:0.95}
+100%{box-shadow:0 0 25px var(--amber),0 0 50px rgba(232,168,56,0.3);opacity:0.9}
+}
+
+/* Pine trees */
+.pines{
+position:absolute;bottom:0;width:100%;
+}
+.pine{
+position:absolute;bottom:0;
+width:0;height:0;
+border-left:solid transparent;
+border-right:solid transparent;
+border-bottom:solid var(--pine-green);
+}
+
+.title-text{
+position:relative;z-index:2;
+}
+.title-text h1{
+font-family:'Cormorant Garamond',serif;
+font-size:clamp(2rem,6vw,3.5rem);
+font-weight:300;
+color:var(--amber-glow);
+text-shadow:0 0 40px rgba(232,168,56,0.5);
+letter-spacing:0.05em;
+margin-bottom:1.5rem;
+line-height:1.2;
+}
+.title-narration{
+font-family:'EB Garamond',serif;
+font-size:clamp(1rem,2.5vw,1.25rem);
+color:var(--soft-cream);
+max-width:580px;
+margin:0 auto;
+line-height:1.9;
+opacity:0.9;
+}
+.title-narration p{
+margin-bottom:0.6rem;
+}
+
+.btn{
+font-family:'Cormorant Garamond',serif;
+font-size:1.15rem;
+padding:0.8rem 2.5rem;
+background:linear-gradient(135deg,var(--warm-gold),var(--amber));
+color:var(--deep-brown);
+border:none;
+border-radius:30px;
+cursor:pointer;
+transition:all 0.4s ease;
+box-shadow:0 4px 20px rgba(232,168,56,0.3);
+margin-top:1.5rem;
+font-weight:600;
+letter-spacing:0.04em;
+}
+.btn:hover{
+transform:translateY(-2px);
+box-shadow:0 6px 30px rgba(232,168,56,0.5);
+background:linear-gradient(135deg,var(--amber),var(--amber-glow));
+}
+
+/* ========== AUDIO BAR ========== */
+.audio-bar{
+position:fixed;bottom:0;left:0;right:0;
+background:rgba(26,15,5,0.95);
+border-top:1px solid rgba(232,168,56,0.2);
+display:flex;justify-content:center;gap:0.5rem;
+padding:0.5rem;z-index:999;
+flex-wrap:wrap;
+}
+.audio-btn{
+font-family:'EB Garamond',serif;
+font-size:0.8rem;
+padding:0.35rem 0.9rem;
+background:rgba(232,168,56,0.15);
+color:var(--amber);
+border:1px solid rgba(232,168,56,0.3);
+border-radius:20px;
+cursor:pointer;
+transition:all 0.3s ease;
+}
+.audio-btn:hover{background:rgba(232,168,56,0.3);}
+.audio-btn.active{background:rgba(232,168,56,0.4);box-shadow:0 0 10px rgba(232,168,56,0.3);}
+
+/* ========== STORY SCENES ========== */
+.story-scene{
+background:linear-gradient(180deg,#1a0e05 0%,#2a1808 50%,#1a0e05 100%);
+padding:2rem 1rem 5rem;
+text-align:center;
+}
+
+/* Illustration placeholder */
+.illustration{
+width:min(600px,92vw);
+height:280px;
+margin:1rem auto 2rem;
+background:linear-gradient(135deg,#2a1808,#3a2515,#2a1808);
+border:2px solid rgba(232,168,56,0.2);
+border-radius:12px;
+display:flex;align-items:center;justify-content:center;
+color:rgba(232,168,56,0.4);
+font-style:italic;
+font-size:0.9rem;
+position:relative;
+overflow:hidden;
+}
+.illustration::before{
+content:'';position:absolute;inset:0;
+background:radial-gradient(ellipse at center,rgba(232,168,56,0.08),transparent 70%);
+}
+
+.narration{
+font-family:'EB Garamond',serif;
+font-size:clamp(1.05rem,2.5vw,1.3rem);
+color:var(--soft-cream);
+max-width:600px;
+margin:0 auto;
+line-height:2;
+text-align:left;
+}
+.narration p{margin-bottom:0.8rem;}
+.narration .dialogue{
+color:var(--amber-glow);
+font-style:italic;
+}
+.narration .reflection{
+color:var(--frost-blue);
+font-style:italic;
+text-align:center;
+margin:1.5rem 0;
+font-size:1.1em;
+}
+
+/* Choices */
+.choices{
+display:flex;flex-direction:column;
+gap:0.8rem;max-width:500px;
+margin:1.5rem auto;align-items:stretch;
+}
+.choice-btn{
+font-family:'EB Garamond',serif;
+font-size:1.1rem;
+padding:1rem 1.5rem;
+background:rgba(232,168,56,0.08);
+color:var(--soft-cream);
+border:1px solid rgba(232,168,56,0.25);
+border-radius:10px;
+cursor:pointer;
+transition:all 0.4s ease;
+text-align:left;
+position:relative;
+overflow:hidden;
+}
+.choice-btn::before{
+content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+background:var(--amber);opacity:0;
+transition:opacity 0.3s ease;
+}
+.choice-btn:hover{
+background:rgba(232,168,56,0.15);
+border-color:rgba(232,168,56,0.5);
+transform:translateX(4px);
+}
+.choice-btn:hover::before{opacity:1}
+
+/* Clickable objects */
+.clickable-objects{
+display:flex;flex-wrap:wrap;
+justify-content:center;gap:1rem;
+margin:1.5rem auto;max-width:600px;
+}
+.clickable-obj{
+padding:0.7rem 1.2rem;
+background:rgba(232,168,56,0.1);
+border:1px dashed rgba(232,168,56,0.3);
+border-radius:8px;
+cursor:pointer;
+transition:all 0.4s ease;
+color:var(--amber-glow);
+font-family:'EB Garamond',serif;
+font-size:1rem;
+}
+.clickable-obj:hover{
+background:rgba(232,168,56,0.25);
+border-style:solid;
+box-shadow:0 0 15px rgba(232,168,56,0.2);
+}
+.clickable-obj.revealed{
+background:rgba(232,168,56,0.05);
+border-color:rgba(232,168,56,0.15);
+cursor:default;
+}
+
+.object-reveal{
+background:rgba(232,168,56,0.06);
+border-left:3px solid var(--amber);
+padding:0.8rem 1.2rem;
+margin:0.8rem auto;
+max-width:500px;
+font-style:italic;
+color:var(--soft-cream);
+border-radius:0 8px 8px 0;
+animation:fadeSlideIn 0.6s ease;
+font-size:1.05rem;
+line-height:1.7;
+}
+
+@keyframes fadeSlideIn{
+from{opacity:0;transform:translateY(10px)}
+to{opacity:1;transform:translateY(0)}
+}
+
+/* ========== LANTERN DOORS ========== */
+.doors-container{
+display:flex;flex-wrap:wrap;
+justify-content:center;gap:1.5rem;
+margin:2rem auto;max-width:700px;
+}
+.lantern-door{
+width:160px;
+padding:1.5rem 1rem;
+background:linear-gradient(180deg,#2a1808,#3a2515);
+border:2px solid rgba(232,168,56,0.3);
+border-radius:12px;
+cursor:pointer;
+transition:all 0.5s ease;
+text-align:center;
+position:relative;
+}
+.lantern-door::before{
+content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+width:20px;height:20px;
+background:var(--amber);
+border-radius:50%;
+box-shadow:0 0 20px var(--amber),0 0 40px rgba(232,168,56,0.3);
+animation:lanternFlicker 2.5s ease-in-out infinite alternate;
+}
+.lantern-door:hover{
+border-color:var(--amber);
+transform:translateY(-5px);
+box-shadow:0 10px 30px rgba(232,168,56,0.2);
+}
+.lantern-door .door-icon{font-size:2rem;margin-bottom:0.5rem;}
+.lantern-door .door-label{
+font-family:'Cormorant Garamond',serif;
+font-size:1.05rem;
+color:var(--amber-glow);
+}
+.lantern-door.visited{
+opacity:0.5;
+border-color:rgba(232,168,56,0.15);
+pointer-events:none;
+}
+.lantern-door.visited::after{
+content:'✓';position:absolute;top:5px;right:8px;
+color:var(--amber);font-size:0.9rem;
+}
+
+/* ========== WARMTH METER ========== */
+.warmth-tracker{
+position:fixed;top:1rem;right:1rem;
+z-index:998;
+display:none;
+}
+.warmth-tracker.show{display:block}
+.warmth-lantern{
+width:40px;height:55px;
+position:relative;
+}
+.warmth-lantern .lantern-body{
+position:absolute;bottom:0;left:5px;right:5px;height:35px;
+background:rgba(232,168,56,0.2);
+border:1px solid rgba(232,168,56,0.4);
+border-radius:3px 3px 6px 6px;
+overflow:hidden;
+}
+.warmth-fill{
+position:absolute;bottom:0;left:0;right:0;
+background:linear-gradient(0deg,var(--fire-orange),var(--amber));
+height:30%;
+transition:height 1s ease;
+}
+.warmth-lantern .lantern-top{
+position:absolute;top:8px;left:50%;transform:translateX(-50%);
+width:12px;height:12px;
+background:var(--amber);
+border-radius:50%;
+box-shadow:0 0 10px var(--amber);
+animation:lanternFlicker 2s ease-in-out infinite alternate;
+transition:box-shadow 1s ease;
+}
+
+/* ========== WRITE YOUR LANTERN MESSAGE ========== */
+.lantern-message-section{
+background:linear-gradient(180deg,#1a0e05,#0a0e1a);
+padding:3rem 1rem 5rem;text-align:center;
+}
+.message-box{
+width:min(500px,90vw);margin:1rem auto;
+}
+.message-box textarea{
+width:100%;
+padding:1rem;
+background:rgba(232,168,56,0.06);
+border:1px solid rgba(232,168,56,0.25);
+border-radius:8px;
+color:var(--soft-cream);
+font-family:'EB Garamond',serif;
+font-size:1.1rem;
+line-height:1.6;
+resize:vertical;
+min-height:80px;
+margin-bottom:0.8rem;
+}
+.message-box textarea::placeholder{
+color:rgba(232,168,56,0.4);
+font-style:italic;
+}
+.message-box textarea:focus{
+outline:none;
+border-color:var(--amber);
+box-shadow:0 0 15px rgba(232,168,56,0.15);
+}
+
+.floating-lantern{
+width:200px;height:280px;
+margin:2rem auto;
+position:relative;
+animation:floatUp 3s ease-in-out infinite alternate;
+display:none;
+}
+@keyframes floatUp{
+from{transform:translateY(0)}
+to{transform:translateY(-15px)}
+}
+.floating-lantern .lantern-glass{
+position:absolute;bottom:40px;left:30px;right:30px;
+height:160px;
+background:rgba(232,168,56,0.15);
+border:2px solid rgba(232,168,56,0.4);
+border-radius:8px 8px 15px 15px;
+display:flex;align-items:center;justify-content:center;
+padding:1rem;
+box-shadow:0 0 40px rgba(232,168,56,0.3),inset 0 0 30px rgba(232,168,56,0.1);
+}
+.floating-lantern .lantern-glass .user-message{
+font-family:'EB Garamond',serif;
+font-size:0.95rem;
+color:var(--amber-glow);
+font-style:italic;
+line-height:1.5;
+text-align:center;
+word-break:break-word;
+}
+.floating-lantern .lantern-hook{
+position:absolute;top:0;left:50%;transform:translateX(-50%);
+width:2px;height:30px;background:rgba(232,168,56,0.5);
+}
+.floating-lantern .lantern-ring{
+position:absolute;top:25px;left:50%;transform:translateX(-50%);
+width:30px;height:15px;
+border:2px solid rgba(232,168,56,0.5);
+border-radius:5px 5px 0 0;
+border-bottom:none;
+}
+.floating-lantern .lantern-flame{
+position:absolute;top:35px;left:50%;transform:translateX(-50%);
+width:10px;height:15px;
+background:var(--amber);
+border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+box-shadow:0 0 20px var(--amber),0 0 40px rgba(232,168,56,0.4);
+animation:lanternFlicker 2s ease-in-out infinite alternate;
+}
+
+/* Final narration */
+.final-narration{
+font-family:'Cormorant Garamond',serif;
+font-size:clamp(1.1rem,3vw,1.4rem);
+color:var(--amber-glow);
+max-width:500px;
+margin:2rem auto;
+line-height:2;
+font-style:italic;
+text-shadow:0 0 20px rgba(232,168,56,0.2);
+}
+
+/* ========== PROGRESS LANTERNS ========== */
+.progress-bar{
+display:flex;gap:0.5rem;
+justify-content:center;
+margin:1.5rem 0;
+}
+.progress-dot{
+width:12px;height:12px;
+background:rgba(232,168,56,0.15);
+border:1px solid rgba(232,168,56,0.3);
+border-radius:50%;
+transition:all 0.5s ease;
+}
+.progress-dot.lit{
+background:var(--amber);
+box-shadow:0 0 10px var(--amber);
+}
+
+/* ========== FIRE ANIMATION ========== */
+.fire-container{
+position:fixed;bottom:50px;left:50%;transform:translateX(-50%);
+pointer-events:none;z-index:997;
+opacity:0;transition:opacity 1s ease;
+}
+.fire-container.show{opacity:0.3}
+
+/* ========== RESPONSIVE ========== */
+@media(max-width:600px){
+.lantern-door{width:140px;padding:1.2rem 0.8rem;}
+.illustration{height:200px;}
+.doors-container{gap:1rem;}
+}
+
+/* Scene-specific cabin glow overlay */
+.cabin-glow-overlay{
+position:fixed;inset:0;
+pointer-events:none;z-index:996;
+background:radial-gradient(ellipse at center bottom,rgba(232,168,56,0.05),transparent 60%);
+transition:background 1.5s ease;
+}
+.cabin-glow-overlay.warm{
+background:radial-gradient(ellipse at center bottom,rgba(232,168,56,0.12),transparent 60%);
+}
+.cabin-glow-overlay.cool{
+background:radial-gradient(ellipse at center bottom,rgba(100,130,180,0.08),transparent 60%);
+}
+.cabin-glow-overlay.bright{
+background:radial-gradient(ellipse at center bottom,rgba(232,168,56,0.2),transparent 60%);
+}
+
+/* Steam animation */
+.steam{
+position:absolute;
+width:2px;
+background:rgba(255,255,255,0.3);
+border-radius:50%;
+animation:steamRise 3s ease-in-out infinite;
+}
+@keyframes steamRise{
+0%{opacity:0;transform:translateY(0) scale(1)}
+30%{opacity:0.6}
+100%{opacity:0;transform:translateY(-60px) scale(2.5)}
+}
+
+/* Twinkling stars in text */
+.twinkle{animation:twinkle 2s ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:0.5;text-shadow:0 0 5px var(--amber)}to{opacity:1;text-shadow:0 0 15px var(--amber)}}
+
+/* Page turn effect */
+.page-turn{animation:pageTurn 0.8s ease}
+@keyframes pageTurn{
+0%{transform:rotateY(-5deg) scale(0.97);opacity:0.5}
+100%{transform:rotateY(0) scale(1);opacity:1}
+}
+
+/* Ending doors */
+.ending-doors{
+display:flex;flex-wrap:wrap;
+justify-content:center;gap:1.2rem;
+margin:2rem auto;max-width:700px;
+}
+.ending-door{
+width:150px;
+padding:1.2rem 0.8rem;
+background:linear-gradient(180deg,rgba(232,168,56,0.08),rgba(232,168,56,0.03));
+border:1px solid rgba(232,168,56,0.25);
+border-radius:10px;
+cursor:pointer;
+transition:all 0.5s ease;
+text-align:center;
+}
+.ending-door:hover{
+border-color:var(--amber);
+background:rgba(232,168,56,0.12);
+transform:translateY(-3px);
+box-shadow:0 8px 25px rgba(232,168,56,0.15);
+}
+.ending-door .ed-icon{font-size:1.8rem;margin-bottom:0.4rem;}
+.ending-door .ed-label{
+font-family:'Cormorant Garamond',serif;
+font-size:0.95rem;
+color:var(--amber-glow);
+line-height:1.4;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--dark-night)}
+::-webkit-scrollbar-thumb{background:rgba(232,168,56,0.3);border-radius:3px}
+</style>
+</head>
+<body>
+
+<canvas id="snow-canvas"></canvas>
+<div class="cabin-glow-overlay" id="glowOverlay"></div>
+
+<!-- WARMTH TRACKER -->
+<div class="warmth-tracker" id="warmthTracker">
+<div class="warmth-lantern">
+<div class="lantern-top" id="warmthFlame"></div>
+<div class="lantern-body"><div class="warmth-fill" id="warmthFill"></div></div>
+</div>
+</div>
+
+<!-- AUDIO BAR -->
+<div class="audio-bar">
+<button class="audio-btn" onclick="toggleAudio('narrate')">🔊 Read to Me</button>
+<button class="audio-btn" onclick="toggleAudio('music')">🎵 Soft Music</button>
+<button class="audio-btn" onclick="toggleAudio('lantern')">🏮 Lantern Sound</button>
+<button class="audio-btn" onclick="toggleAudio('fire')">🔥 Fireplace Sound</button>
+</div>
+
+<!-- ==================== TITLE SCREEN ==================== -->
+<div class="scene active visible" id="title-screen">
+<div class="title-cabin-wrapper">
+<div class="pines">
+<div class="pine" style="left:5%;border-left-width:18px;border-right-width:18px;border-bottom-width:80px;opacity:0.6"></div>
+<div class="pine" style="left:15%;border-left-width:14px;border-right-width:14px;border-bottom-width:65px;opacity:0.5"></div>
+<div class="pine" style="right:8%;border-left-width:20px;border-right-width:20px;border-bottom-width:90px;opacity:0.55"></div>
+<div class="pine" style="right:20%;border-left-width:12px;border-right-width:12px;border-bottom-width:55px;opacity:0.45"></div>
+<div class="pine" style="left:35%;border-left-width:16px;border-right-width:16px;border-bottom-width:70px;opacity:0.4"></div>
+<div class="pine" style="right:35%;border-left-width:15px;border-right-width:15px;border-bottom-width:60px;opacity:0.35"></div>
+</div>
+<div class="title-cabin">
+<div class="cabin-chimney"></div>
+<div class="cabin-roof"></div>
+<div class="cabin-body">
+<div class="cabin-window left"></div>
+<div class="cabin-window right"></div>
+<div class="cabin-door"></div>
+</div>
+</div>
+</div>
+<div class="title-text">
+<h1>Papa Bear's<br>Little Lantern Cabin</h1>
+<div class="title-narration" id="titleNarration"></div>
+<button class="btn" id="beginBtn" style="display:none" onclick="startStory()">Begin the Story</button>
+</div>
+</div>
+
+<!-- ==================== SCENE 1 ==================== -->
+<div class="scene story-scene" id="scene1">
+<div class="illustration" id="ill1">
+<span>[ Papa Bear at the cabin door — snow falling — two cubs arriving ]</span>
+</div>
+<div class="narration" id="scene1Text"></div>
+<div class="choices" id="scene1Choices" style="display:none"></div>
+<div id="scene1Result" style="display:none"></div>
+</div>
+
+<!-- ==================== SCENE 2 ==================== -->
+<div class="scene story-scene" id="scene2">
+<div class="illustration">
+<span>[ Flashback: Papa Bear alone, preparing the cabin ]</span>
+</div>
+<div class="narration" id="scene2Text"></div>
+<div class="clickable-objects" id="scene2Objects" style="display:none"></div>
+<div id="scene2Reveals"></div>
+<div id="scene2Continue" style="display:none" class="narration" style="text-align:center">
+<p class="reflection">Some kinds of love happen before anyone is there to see them.</p>
+<button class="btn" onclick="showLanternDoors()">Open a Lantern Door</button>
+</div>
+</div>
+
+<!-- ==================== LANTERN DOORS ==================== -->
+<div class="scene story-scene" id="lanternDoors">
+<div class="narration" style="text-align:center;margin-bottom:1rem">
+<p>Three doors appear in the golden light of the cabin.</p>
+<p class="reflection">Tonight, you may open one door. Tomorrow, you can come back and open another.</p>
+</div>
+<div class="doors-container" id="doorsContainer"></div>
+</div>
+
+<!-- ==================== PATH A: SOUP ==================== -->
+<div class="scene story-scene" id="pathA1">
+<div class="illustration"><span>[ Small table — warm bowls — soup steam curling into tiny shapes ]</span></div>
+<div class="narration" id="pathA1Text"></div>
+<div class="choices" id="pathA1Choices" style="display:none"></div>
+<div id="pathA1Result" style="display:none"></div>
+</div>
+
+<div class="scene story-scene" id="pathA2">
+<div class="illustration"><span>[ Two small cups on a high shelf — one blue, one green ]</span></div>
+<div class="narration" id="pathA2Text"></div>
+<div class="clickable-objects" id="pathA2Objects" style="display:none"></div>
+<div id="pathA2Reveals"></div>
+<div class="choices" id="pathA2Choices" style="display:none"></div>
+<div id="pathA2Result" style="display:none"></div>
+</div>
+
+<!-- ==================== PATH B: FOREST ==================== -->
+<div class="scene story-scene" id="pathB1">
+<div class="illustration"><span>[ Snowy forest path — Papa Bear with a small backpack ]</span></div>
+<div class="narration" id="pathB1Text"></div>
+<div class="clickable-objects" id="pathB1Objects" style="display:none"></div>
+<div id="pathB1Reveals"></div>
+<div class="choices" id="pathB1Choices" style="display:none"></div>
+<div id="pathB1Result" style="display:none"></div>
+</div>
+
+<div class="scene story-scene" id="pathB2">
+<div class="illustration"><span>[ Frozen pond — ducks waddling in a sleepy line ]</span></div>
+<div class="narration" id="pathB2Text"></div>
+<div class="choices" id="pathB2Choices" style="display:none"></div>
+<div id="pathB2Result" style="display:none"></div>
+</div>
+
+<!-- ==================== PATH C: STARS ==================== -->
+<div class="scene story-scene" id="pathC1">
+<div class="illustration"><span>[ Sleeping corner — paper stars hanging from strings ]</span></div>
+<div class="narration" id="pathC1Text"></div>
+<div class="clickable-objects" id="pathC1Objects" style="display:none"></div>
+<div id="pathC1Reveals"></div>
+<div class="choices" id="pathC1Choices" style="display:none"></div>
+<div id="pathC1Result" style="display:none"></div>
+</div>
+
+<div class="scene story-scene" id="pathC2">
+<div class="illustration"><span>[ Cubs sleeping — Papa Bear sitting by the fire quietly ]</span></div>
+<div class="narration" id="pathC2Text"></div>
+</div>
+
+<!-- ==================== INTERLUDE ==================== -->
+<div class="scene story-scene" id="interlude">
+<div class="illustration"><span>[ Clover and Pip whispering under the paper stars ]</span></div>
+<div class="narration" id="interludeText"></div>
+<div class="choices" id="interludeChoices" style="display:none"></div>
+<div id="interludeResult" style="display:none"></div>
+</div>
+
+<!-- ==================== FINAL DOORS ==================== -->
+<div class="scene story-scene" id="finalDoors">
+<div class="narration" id="finalDoorsText"></div>
+<div class="ending-doors" id="endingDoorsContainer"></div>
+</div>
+
+<!-- ==================== ENDINGS ==================== -->
+<div class="scene story-scene" id="endingScene">
+<div class="illustration" id="endingIll"><span>[ Final scene ]</span></div>
+<div class="narration" id="endingText"></div>
+<div style="text-align:center;margin-top:1.5rem" id="endingButtons"></div>
+</div>
+
+<!-- ==================== LANTERN MESSAGE ==================== -->
+<div class="scene lantern-message-section" id="lanternMessage">
+<h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.5rem,4vw,2.2rem);color:var(--amber-glow);margin-bottom:0.5rem;">Leave a Lantern Message</h2>
+<p style="color:var(--soft-cream);font-style:italic;margin-bottom:1.5rem;font-size:1.1rem;">If you were one of Papa Bear's cubs, what would you say?</p>
+<div class="message-box">
+<textarea id="msg1" placeholder="Papa Bear, I noticed that you…" rows="2"></textarea>
+<textarea id="msg2" placeholder="One kind thing I could say next time is…" rows="2"></textarea>
+<textarea id="msg3" placeholder="One thing we could do together is…" rows="2"></textarea>
+</div>
+<button class="btn" onclick="lightMyLantern()">🏮 Light My Lantern</button>
+
+<div class="floating-lantern" id="floatingLantern">
+<div class="lantern-hook"></div>
+<div class="lantern-ring"></div>
+<div class="lantern-flame"></div>
+<div class="lantern-glass">
+<div class="user-message" id="userLanternMsg"></div>
+</div>
+</div>
+
+<div class="final-narration" id="finalNarrationText" style="display:none">
+<p>And so the little cabin kept glowing.</p>
+<p>Not because it was big.</p>
+<p>Not because it was perfect.</p>
+<p>But because love had been seen.</p>
+<p>And once love is seen, it shines differently forever.</p>
+</div>
+
+<button class="btn" id="restartBtn" style="display:none;margin-top:1rem" onclick="location.reload()">Return to the Cabin Another Night</button>
+</div>
+
+<script>
+// ========== SNOW ==========
+const canvas = document.getElementById('snow-canvas');
+const ctx = canvas.getContext('2d');
+let snowflakes = [];
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+window.addEventListener('resize',resizeCanvas);
+resizeCanvas();
+
+for(let i=0;i<120;i++){
+snowflakes.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+r:Math.random()*2.5+0.5,
+speed:Math.random()*1+0.3,
+wind:Math.random()*0.5-0.25,
+opacity:Math.random()*0.6+0.2
+});
+}
+function drawSnow(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+snowflakes.forEach(s=>{
+ctx.beginPath();
+ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+ctx.fillStyle=`rgba(230,235,245,${s.opacity})`;
+ctx.fill();
+s.y+=s.speed;
+s.x+=s.wind+Math.sin(Date.now()*0.001+s.x)*0.2;
+if(s.y>canvas.height+5){s.y=-5;s.x=Math.random()*canvas.width}
+if(s.x>canvas.width+5)s.x=-5;
+if(s.x<-5)s.x=canvas.width+5;
+});
+requestAnimationFrame(drawSnow);
+}
+drawSnow();
+
+// ========== STATE ==========
+let warmth = 30;
+let visitedDoors = JSON.parse(localStorage.getItem('pb_visited')||'[]');
+let currentPath = '';
+
+function setWarmth(v){
+warmth=Math.max(10,Math.min(100,v));
+document.getElementById('warmthFill').style.height=warmth+'%';
+const flame=document.getElementById('warmthFlame');
+const glow=document.getElementById('glowOverlay');
+if(warmth>70){flame.style.boxShadow='0 0 18px var(--amber),0 0 35px var(--amber-glow)';glow.className='cabin-glow-overlay bright'}
+else if(warmth>45){flame.style.boxShadow='0 0 10px var(--amber)';glow.className='cabin-glow-overlay warm'}
+else{flame.style.boxShadow='0 0 5px rgba(232,168,56,0.4)';glow.className='cabin-glow-overlay cool'}
+}
+
+// ========== SCENE MANAGEMENT ==========
+function goToScene(id){
+document.querySelectorAll('.scene').forEach(s=>{s.classList.remove('visible');setTimeout(()=>s.classList.remove('active'),1200)});
+setTimeout(()=>{
+const el=document.getElementById(id);
+el.classList.add('active');
+el.scrollTo&&window.scrollTo({top:0,behavior:'smooth'});
+requestAnimationFrame(()=>{el.classList.add('visible');el.classList.add('page-turn')});
+window.scrollTo({top:0,behavior:'smooth'});
+},400);
+}
+
+// ========== TYPEWRITER ==========
+function typeWrite(el,text,speed=25){
+return new Promise(resolve=>{
+el.innerHTML='';
+let i=0;
+const lines=text.split('\n');
+let html='';
+function addChar(){
+if(i<text.length){
+const ch=text[i];
+if(ch==='\n'){html+='<br>';i++;addChar();return}
+html+=ch;
+el.innerHTML=html;
+i++;
+setTimeout(addChar,ch==='.'||ch==='?'||ch==='!'?speed*6:ch===','?speed*3:speed);
+}else{resolve()}
+}
+addChar();
+});
+}
+
+// ========== AUDIO PLACEHOLDER ==========
+function toggleAudio(type){
+const btns=document.querySelectorAll('.audio-btn');
+// placeholder – just toggle visual
+event.target.classList.toggle('active');
+}
+
+// ========== TITLE SEQUENCE ==========
+const titleLines=[
+"Once, beyond the snowy pines and the blue hills of Lantern Hollow,\nthere lived a gentle bear called Papa Bear.",
+"His cabin was not large.\nIt did not have long hallways.\nIt did not have shining staircases.\nIt did not have rooms that echoed when little paws ran through them.",
+"But every time his cubs were coming,\nPapa Bear made the little cabin ready.",
+"He swept the floor.\nHe warmed the soup.\nHe folded the blankets.\nHe placed two cups on the table.",
+"And in the window, he lit two lanterns.\nOne for Clover.\nOne for Pip."
+];
+
+async function animateTitle(){
+const el=document.getElementById('titleNarration');
+for(let line of titleLines){
+const p=document.createElement('p');
+el.appendChild(p);
+await typeWrite(p,line,30);
+await new Promise(r=>setTimeout(r,600));
+}
+document.getElementById('beginBtn').style.display='inline-block';
+document.getElementById('beginBtn').style.animation='fadeSlideIn 1s ease';
+}
+setTimeout(animateTitle,800);
+
+// ========== START STORY ==========
+function startStory(){
+document.getElementById('warmthTracker').classList.add('show');
+goToScene('scene1');
+setTimeout(()=>buildScene1(),600);
+}
+
+// ========== SCENE 1 ==========
+async function buildScene1(){
+const txt=`When Clover and Pip came to the little cabin, Papa Bear opened the door before they even knocked.\n\n<span class="dialogue">"I heard your paws in the snow,"</span> he said with a smile.\n\nThe cabin smelled like soup, pinewood, and warm bread.\n\nPip looked around.\nThe table was small. The rug was small. The sleeping corner was small.\n\nPip frowned.\n\n<span class="dialogue">"This cabin is little,"</span> she said.\n\nPapa Bear's smile stayed soft.\n\n<span class="dialogue">"Yes, little cub,"</span> he said. <span class="dialogue">"But I warmed every corner I could find."</span>`;
+document.getElementById('scene1Text').innerHTML=txt;
+document.getElementById('scene1Text').style.animation='fadeSlideIn 1.5s ease';
+
+await new Promise(r=>setTimeout(r,1500));
+
+const choices=document.getElementById('scene1Choices');
+choices.style.display='flex';
+choices.style.animation='fadeSlideIn 0.8s ease';
+
+const options=[
+{text:'"I don\'t like it here."',handler:()=>scene1Choice(1)},
+{text:'"I miss having more room."',handler:()=>scene1Choice(2)},
+{text:'"Can we make this corner cozy?"',handler:()=>scene1Choice(3)},
+];
+choices.innerHTML='<p style="text-align:center;color:var(--amber);font-style:italic;margin-bottom:0.5rem">What should Pip say next?</p>';
+options.forEach(o=>{
+const b=document.createElement('button');
+b.className='choice-btn';b.textContent=o.text;
+b.onclick=o.handler;
+choices.appendChild(b);
+});
+}
+
+function scene1Choice(n){
+document.getElementById('scene1Choices').style.display='none';
+const res=document.getElementById('scene1Result');
+res.style.display='block';
+let html='<div class="narration" style="animation:fadeSlideIn 1s ease">';
+if(n===1){
+html+=`<p>Pip says, <span class="dialogue">"I don't like it here."</span></p>
+<p>The fire crackles softly.</p>
+<p>Papa Bear looks at the soup pot for one quiet second.</p>
+<p>Then he says, <span class="dialogue">"You must be hungry from the walk."</span></p>
+<p>He places her favorite cup on the table.</p>
+<p class="reflection">Sharp words can make a warm room feel colder.<br>But Papa Bear still kept the soup warm.</p>`;
+setWarmth(warmth-10);
+}else if(n===2){
+html+=`<p>Pip says, <span class="dialogue">"I miss having more room."</span></p>
+<p>Papa Bear nods.</p>
+<p><span class="dialogue">"That is an honest feeling,"</span> he says. <span class="dialogue">"We can hold honest feelings gently."</span></p>
+<p>He moves a cushion closer to the fire.</p>
+<p class="reflection">Honest words are easier to hold than sharp ones.</p>`;
+setWarmth(warmth+5);
+}else{
+html+=`<p>Pip says, <span class="dialogue">"Can we make this corner cozy?"</span></p>
+<p>Papa Bear's eyes brighten.</p>
+<p><span class="dialogue">"I was hoping you might ask."</span></p>
+<p>He brings out a folded blanket with tiny stitched stars.</p>
+<p class="reflection">Sometimes one kind question makes a little room begin to grow.</p>`;
+setWarmth(warmth+15);
+}
+html+=`<div style="text-align:center"><button class="btn" onclick="goToScene2()">Continue</button></div></div>`;
+res.innerHTML=html;
+}
+
+// ========== SCENE 2 ==========
+function goToScene2(){
+goToScene('scene2');
+setTimeout(buildScene2,600);
+}
+
+async function buildScene2(){
+const txt=`Before Clover and Pip came through the snow, Papa Bear had been busy all morning.\n\nHe tasted the soup.\n<span class="dialogue">"Too much pepper for Pip,"</span> he murmured.\nHe added more noodles.\n<span class="dialogue">"Clover likes noodles when the day is cold."</span>\n\nHe checked the boots by the fire.\nHe shook out the blankets.\nHe looked at the two little cups.\n\nThen he looked at the door.\nThe cabin was very quiet.\n\nSo Papa Bear lit the two lanterns in the window.\nNot because anyone was lost.\nBut because someone was welcome.`;
+document.getElementById('scene2Text').innerHTML=txt;
+document.getElementById('scene2Text').style.animation='fadeSlideIn 1.5s ease';
+
+await new Promise(r=>setTimeout(r,1200));
+
+const objs=document.getElementById('scene2Objects');
+objs.style.display='flex';
+objs.style.animation='fadeSlideIn 0.8s ease';
+
+const items=[
+{name:'🍲 Soup Pot',reveal:'Papa Bear remembered that Pip liked her carrots cut small.'},
+{name:'🥾 Boots',reveal:'Papa Bear remembered that Clover\'s paws got cold last time.'},
+{name:'🛏️ Blankets',reveal:'Papa Bear chose the softest one because Pip once said the wool blanket scratched her chin.'},
+{name:'☕ Two Cups',reveal:'Papa Bear kept the little blue cup and the little green cup on the highest shelf so they would not break.'},
+{name:'🏮 Lanterns',reveal:'Papa Bear lit one lantern for each cub, even before they arrived.'},
+];
+let revealed=0;
+items.forEach(item=>{
+const b=document.createElement('button');
+b.className='clickable-obj';b.textContent=item.name;
+b.onclick=()=>{
+if(b.classList.contains('revealed'))return;
+b.classList.add('revealed');
+const d=document.createElement('div');
+d.className='object-reveal';d.textContent=item.reveal;
+document.getElementById('scene2Reveals').appendChild(d);
+setWarmth(warmth+3);
+revealed++;
+if(revealed>=3){
+setTimeout(()=>{
+document.getElementById('scene2Continue').style.display='block';
+document.getElementById('scene2Continue').style.animation='fadeSlideIn 1s ease';
+},800);
+}
+};
+objs.appendChild(b);
+});
+}
+
+// ========== LANTERN DOORS ==========
+function showLanternDoors(){
+goToScene('lanternDoors');
+setTimeout(buildLanternDoors,600);
+}
+
+function buildLanternDoors(){
+const container=document.getElementById('doorsContainer');
+container.innerHTML='';
+const doors=[
+{id:'A',icon:'🍲',label:'The Soup Door',scene:'pathA1',builder:buildPathA1},
+{id:'B',icon:'🌲',label:'The Forest Door',scene:'pathB1',builder:buildPathB1},
+{id:'C',icon:'⭐',label:'The Star Door',scene:'pathC1',builder:buildPathC1},
+];
+doors.forEach(d=>{
+const el=document.createElement('div');
+el.className='lantern-door'+(visitedDoors.includes(d.id)?' visited':'');
+el.innerHTML=`<div class="door-icon">${d.icon}</div><div class="door-label">${d.label}</div>`;
+el.onclick=()=>{
+if(visitedDoors.includes(d.id))return;
+visitedDoors.push(d.id);
+localStorage.setItem('pb_visited',JSON.stringify(visitedDoors));
+currentPath=d.id;
+goToScene(d.scene);
+setTimeout(d.builder,600);
+};
+container.appendChild(el);
+});
+}
+
+// ========== PATH A: SOUP ==========
+async function buildPathA1(){
+const txt=`Papa Bear carried the soup carefully.\n\nPip looked into her bowl.\nThe carrots were cut into tiny moons.\nThe noodles curled like little ribbons.\n\nClover looked into her bowl.\nExtra noodles. Just the way she liked them.\n\nPip blinked.\n<span class="dialogue">"How did you know?"</span>\n\nPapa Bear chuckled.\n<span class="dialogue">"You told me once."</span>\n\n<span class="dialogue">"I did?"</span>\n\n<span class="dialogue">"Yes,"</span> said Papa Bear. <span class="dialogue">"On a rainy day. You said big carrots were too bossy."</span>\n\nPip stared at the bowl.\nShe had forgotten saying it.\nPapa Bear had not.`;
+document.getElementById('pathA1Text').innerHTML=txt;
+
+await new Promise(r=>setTimeout(r,1200));
+const choices=document.getElementById('pathA1Choices');
+choices.style.display='flex';
+choices.innerHTML='<p style="text-align:center;color:var(--amber);font-style:italic">What should Pip do?</p>';
+[
+{text:'Eat without saying anything.',fn:()=>pathA1Choice(1)},
+{text:'Say, "You remembered?"',fn:()=>pathA1Choice(2)},
+{text:'Say, "Can I help stir next time?"',fn:()=>pathA1Choice(3)},
+].forEach(o=>{const b=document.createElement('button');b.className='choice-btn';b.textContent=o.text;b.onclick=o.fn;choices.appendChild(b)});
+}
+
+function pathA1Choice(n){
+document.getElementById('pathA1Choices').style.display='none';
+const res=document.getElementById('pathA1Result');res.style.display='block';
+let h='<div class="narration" style="animation:fadeSlideIn 1s ease">';
+if(n===1){
+h+=`<p>Pip eats quietly.</p><p>Papa Bear does not ask for praise.</p><p>But Clover notices that his shoulders relax when Pip takes another spoonful.</p><p class="reflection">Even quiet noticing can begin inside the heart.</p>`;
+setWarmth(warmth+3);
+}else if(n===2){
+h+=`<p>Pip whispers, <span class="dialogue">"You remembered?"</span></p><p>Papa Bear smiles.</p><p><span class="dialogue">"I try to keep important things in my heart."</span></p><p>The lantern on the table glows brighter.</p><p class="reflection">A remembered thing can feel like a hug.</p>`;
+setWarmth(warmth+12);
+}else{
+h+=`<p>Pip says, <span class="dialogue">"Can I help stir next time?"</span></p><p>Papa Bear's big paws pause.</p><p>Then he hands her the wooden spoon.</p><p><span class="dialogue">"Next time can begin now,"</span> he says.</p><p class="reflection">The soup steam curls upward, and for just a moment, it forms the shape of a small heart before it disappears.</p>`;
+setWarmth(warmth+18);
+}
+h+=`<div style="text-align:center"><button class="btn" onclick="goToScene('pathA2');setTimeout(buildPathA2,600)">Continue the Soup Path</button></div></div>`;
+res.innerHTML=h;
+}
+
+async function buildPathA2(){
+const txt=`After supper, Clover noticed something high on the shelf.\n\nTwo little cups. One blue. One green.\n\n<span class="dialogue">"Papa,"</span> Clover asked, <span class="dialogue">"why do you keep those cups up there?"</span>\n\nPapa Bear looked almost shy.\n<span class="dialogue">"So they will be safe for when you come."</span>\n\nPip looked at her green cup.\n<span class="dialogue">"You keep them even when we are not here?"</span>\n\nPapa Bear nodded.\n<span class="dialogue">"The cabin remembers you with me."</span>`;
+document.getElementById('pathA2Text').innerHTML=txt;
+
+await new Promise(r=>setTimeout(r,800));
+const objs=document.getElementById('pathA2Objects');
+objs.style.display='flex';
+[{name:'🟢 Green Cup',reveal:'Papa Bear washed it twice because he wanted it to shine.'},
+{name:'🔵 Blue Cup',reveal:'Papa Bear kept it safe after Clover once said it felt like holding a piece of sky.'}
+].forEach(item=>{
+const b=document.createElement('button');b.className='clickable-obj';b.textContent=item.name;
+b.onclick=()=>{if(b.classList.contains('revealed'))return;b.classList.add('revealed');
+const d=document.createElement('div');d.className='object-reveal';d.textContent=item.reveal;
+document.getElementById('pathA2Reveals').appendChild(d);setWarmth(warmth+4)};
+objs.appendChild(b);
+});
+
+await new Promise(r=>setTimeout(r,600));
+const choices=document.getElementById('pathA2Choices');choices.style.display='flex';
+choices.innerHTML='<p style="text-align:center;color:var(--amber);font-style:italic">What could Clover say?</p>';
+[{text:'"It\'s just a cup."',fn:()=>pathA2Choice(1)},
+{text:'"You saved it for us?"',fn:()=>pathA2Choice(2)},
+{text:'"Can we draw a picture to put beside them?"',fn:()=>pathA2Choice(3)}
+].forEach(o=>{const b=document.createElement('button');b.className='choice-btn';b.textContent=o.text;b.onclick=o.fn;choices.appendChild(b)});
+}
+
+function pathA2Choice(n){
+document.getElementById('pathA2Choices').style.display='none';
+const res=document.getElementById('pathA2Result');res.style.display='block';
+let h='<div class="narration" style="animation:fadeSlideIn 1s ease">';
+if(n===1){
+h+=`<p>Papa Bear nods, but the room becomes quieter.</p><p>He places the cup back on the shelf, carefully.</p><p class="reflection">Some things hold more than what we first see.</p>`;
+setWarmth(warmth-5);
+}else if(n===2){
+h+=`<p>Clover whispers, <span class="dialogue">"You saved it for us?"</span></p><p>The lantern glows brighter.</p><p>Papa Bear smiles. <span class="dialogue">"Always."</span></p><p class="reflection">A kept thing is a kind of promise.</p>`;
+setWarmth(warmth+12);
+}else{
+h+=`<p>Papa Bear's face lights up.</p><p><span class="dialogue">"What a wonderful idea."</span></p><p>Clover draws a tiny picture of the cabin. Pip draws a wobbly duck.</p><p>Papa Bear places both drawings on the shelf beside the cups.</p><p class="reflection">A shelf can hold more than cups. It can hold belonging.</p>`;
+setWarmth(warmth+18);
+}
+h+=`<div style="text-align:center"><button class="btn" onclick="goToInterlude()">Continue</button></div></div>`;
+res.innerHTML=h;
+}
+
+// ========== PATH B: FOREST ==========
+async function buildPathB1(){
+const txt=`The next morning, Pip pressed her nose to the window.\n\n<span class="dialogue">"It is boring here,"</span> she said.\n\nPapa Bear tied his scarf.\n<span class="dialogue">"Then we must go where the trees keep secrets."</span>\n\nHe opened the door. Outside, the snow glittered.\n\nClover noticed Papa Bear's backpack.\nInside were apples, warm mittens, a tiny map, and two honey cakes wrapped in cloth.\n\n<span class="dialogue">"Did you pack all that today?"</span> Clover asked.\n\nPapa Bear smiled.\n<span class="dialogue">"Last night."</span>`;
+document.getElementById('pathB1Text').innerHTML=txt;
+
+await new Promise(r=>setTimeout(r,800));
+const objs=document.getElementById('pathB1Objects');objs.style.display='flex';
+[{name:'🎒 Backpack',reveal:'Papa Bear packed extra mittens because Pip always loses one.'},
+{name:'🗺️ Map',reveal:'Papa Bear drew the path himself, marking a spot where he once saw a family of ducks.'},
+{name:'🍯 Honey Cakes',reveal:'Papa Bear saved the last honey to make them.'},
+{name:'🍎 Apples',reveal:'Papa Bear cut them small because Clover\'s tooth was loose last winter.'}
+].forEach(item=>{
+const b=document.createElement('button');b.className='clickable-obj';b.textContent=item.name;
+b.onclick=()=>{if(b.classList.contains('revealed'))return;b.classList.add('revealed');
+const d=document.createElement('div');d.className='object-reveal';d.textContent=item.reveal;
+document.getElementById('pathB1Reveals').appendChild(d);setWarmth(warmth+3)};
+objs.appendChild(b);
+});
+
+await new Promise(r=>setTimeout(r,600));
+const choices=document.getElementById('pathB1Choices');choices.style.display='flex';
+choices.innerHTML='<p style="text-align:center;color:var(--amber);font-style:italic">What should the cubs say?</p>';
+[{text:'"How far is it?"',fn:()=>pathB1Choice(1)},
+{text:'"You planned this for us?"',fn:()=>pathB1Choice(2)},
+{text:'"Can we choose the first turn?"',fn:()=>pathB1Choice(3)}
+].forEach(o=>{const b=document.createElement('button');b.className='choice-btn';b.textContent=o.text;b.onclick=o.fn;choices.appendChild(b)});
+}
+
+function pathB1Choice(n){
+document.getElementById('pathB1Choices').style.display='none';
+const res=document.getElementById('pathB1Result');res.style.display='block';
+let h='<div class="narration" style="animation:fadeSlideIn 1s ease">';
+if(n===1){
+h+=`<p>Papa Bear answers kindly, <span class="dialogue">"Not too far for tired paws."</span></p><p>He holds out his big paw, and Clover takes it.</p>`;
+setWarmth(warmth+3);
+}else if(n===2){
+h+=`<p>Papa Bear smiles.</p><p><span class="dialogue">"I thought the cabin might feel bigger if we carried our love outside."</span></p><p class="reflection">Love does not always stay indoors.</p>`;
+setWarmth(warmth+12);
+}else{
+h+=`<p>Papa Bear bows playfully.</p><p><span class="dialogue">"Lead the way, brave cubs."</span></p><p>Pip marches forward. Clover follows. Papa Bear watches them with eyes full of quiet joy.</p>`;
+setWarmth(warmth+10);
+}
+h+=`<div style="text-align:center"><button class="btn" onclick="goToScene('pathB2');setTimeout(buildPathB2,600)">Continue the Forest Path</button></div></div>`;
+res.innerHTML=h;
+}
+
+async function buildPathB2(){
+const txt=`At the end of the path, the forest opened to a frozen pond.\n\nNear the reeds, ducks waddled in a sleepy line.\n\nPip gasped.\n<span class="dialogue">"Ducks!"</span>\n\nPapa Bear laughed.\n<span class="dialogue">"You told me you liked them."</span>\n\n<span class="dialogue">"When?"</span>\n\n<span class="dialogue">"In spring,"</span> said Papa Bear. <span class="dialogue">"You saw one with a green head and said it looked like a king."</span>\n\nPip stared at the ducks.\nThe pond sparkled.\nShe had forgotten.\nPapa Bear had not.`;
+document.getElementById('pathB2Text').innerHTML=txt;
+
+await new Promise(r=>setTimeout(r,1200));
+const choices=document.getElementById('pathB2Choices');choices.style.display='flex';
+choices.innerHTML='<p style="text-align:center;color:var(--amber);font-style:italic">What should Pip do now?</p>';
+[{text:'Run ahead without looking back.',fn:()=>pathB2Choice(1)},
+{text:'Look at Papa Bear and smile.',fn:()=>pathB2Choice(2)},
+{text:'Ask Papa Bear to tell the duck story again.',fn:()=>pathB2Choice(3)}
+].forEach(o=>{const b=document.createElement('button');b.className='choice-btn';b.textContent=o.text;b.onclick=o.fn;choices.appendChild(b)});
+}
+
+function pathB2Choice(n){
+document.getElementById('pathB2Choices').style.display='none';
+const res=document.getElementById('pathB2Result');res.style.display='block';
+let h='<div class="narration" style="animation:fadeSlideIn 1s ease">';
+if(n===1){
+h+=`<p>Pip runs ahead. Papa Bear watches carefully to make sure she does not slip.</p><p class="reflection">Even when Pip forgot to look back, Papa Bear was still watching over her.</p>`;
+setWarmth(warmth+2);
+}else if(n===2){
+h+=`<p>Pip smiles at Papa Bear.</p><p>The pond shines gold.</p><p class="reflection">A smile can tell someone, "I see what you did."</p>`;
+setWarmth(warmth+14);
+}else{
+h+=`<p>Papa Bear tells the duck story with a silly duck voice.</p><p>Clover laughs so hard she falls into the snow.</p><p>Pip laughs until her belly aches.</p><p>The ducks, offended, waddle away with great dignity.</p><p class="reflection">Laughter shared is a room without walls.</p>`;
+setWarmth(warmth+16);
+}
+h+=`<div style="text-align:center"><button class="btn" onclick="goToInterlude()">Continue</button></div></div>`;
+res.innerHTML=h;
+}
+
+// ========== PATH C: STARS ==========
+async function buildPathC1(){
+const txt=`That night, when the fire was low, Clover looked up.\n\nAbove the sleeping corner were paper stars.\nSome were silver. Some were gold. Some were crooked.\nOne looked more like a potato than a star.\n\nClover sat up.\n<span class="dialogue">"Papa?"</span>\n\nPapa Bear turned from the fire.\n<span class="dialogue">"Yes?"</span>\n\n<span class="dialogue">"Did you make those?"</span>\n\nPapa Bear rubbed the back of his neck.\n<span class="dialogue">"I tried."</span>\n\nPip squinted.\n<span class="dialogue">"They are not real stars."</span>\n\nPapa Bear nodded.\n<span class="dialogue">"No,"</span> he said. <span class="dialogue">"I could not bring the real ones inside."</span>\n\nHe looked up at the little crooked stars.\n<span class="dialogue">"So I made the kind I could reach."</span>`;
+document.getElementById('pathC1Text').innerHTML=txt;
+
+await new Promise(r=>setTimeout(r,800));
+const objs=document.getElementById('pathC1Objects');objs.style.display='flex';
+[{name:'✨ Gold Star',reveal:'Papa Bear cut this one three times because the first two tore.'},
+{name:'🌟 Silver Star',reveal:'Papa Bear made this one after Clover said she liked the night sky.'},
+{name:'⭐ Crooked Star',reveal:'Papa Bear almost threw this one away, but then he thought it looked cheerful.'}
+].forEach(item=>{
+const b=document.createElement('button');b.className='clickable-obj';b.textContent=item.name;
+b.onclick=()=>{if(b.classList.contains('revealed'))return;b.classList.add('revealed');
+const d=document.createElement('div');d.className='object-reveal';d.textContent=item.reveal;
+document.getElementById('pathC1Reveals').appendChild(d);setWarmth(warmth+4)};
+objs.appendChild(b);
+});
+
+await new Promise(r=>setTimeout(r,600));
+const choices=document.getElementById('pathC1Choices');choices.style.display='flex';
+choices.innerHTML='<p style="text-align:center;color:var(--amber);font-style:italic">What should Clover say?</p>';
+[{text:'"They are not real."',fn:()=>pathC1Choice(1)},
+{text:'"You remembered I liked stars?"',fn:()=>pathC1Choice(2)},
+{text:'"Can we make more together?"',fn:()=>pathC1Choice(3)}
+].forEach(o=>{const b=document.createElement('button');b.className='choice-btn';b.textContent=o.text;b.onclick=o.fn;choices.appendChild(b)});
+}
+
+function pathC1Choice(n){
+document.getElementById('pathC1Choices').style.display='none';
+const res=document.getElementById('pathC1Result');res.style.display='block';
+let h='<div class="narration" style="animation:fadeSlideIn 1s ease">';
+if(n===1){
+h+=`<p>Papa Bear smiles gently.</p><p><span class="dialogue">"No, little cub. But they are real paper. And real trying."</span></p><p class="reflection">Trying is its own kind of light.</p>`;
+setWarmth(warmth-3);
+}else if(n===2){
+h+=`<p>The lantern glows.</p><p>Papa Bear says, <span class="dialogue">"I remember more than you think."</span></p><p class="reflection">Being remembered is one of the deepest kinds of being loved.</p>`;
+setWarmth(warmth+14);
+}else{
+h+=`<p>Papa Bear brings out paper, scissors, and string.</p><p>The three bears sit by the fire, cutting and folding.</p><p>The ceiling slowly fills with more stars.</p><p>Some are beautiful. Some are lumpy. One looks like a fish.</p><p>They all shine.</p><p class="reflection">Love made together fills the sky faster.</p>`;
+setWarmth(warmth+20);
+}
+h+=`<div style="text-align:center"><button class="btn" onclick="goToScene('pathC2');setTimeout(buildPathC2,600)">Continue the Star Path</button></div></div>`;
+res.innerHTML=h;
+}
+
+async function buildPathC2(){
+const txt=`When the cubs fell asleep, Papa Bear did not sleep right away.\n\nHe tucked the blanket around Clover's paws.\nHe moved Pip's cup away from the edge of the table.\nHe placed one more log on the fire.\n\nThen he sat quietly.\n\nThe cabin was small.\nBut with the cubs inside it, Papa Bear felt as if the whole sky had come home.\n\nHe whispered, so softly only the lantern heard:\n\n<span class="dialogue">"I hope they know."</span>\n\nThe lantern flickered.\n\n<span class="dialogue">"I hope they know how much."</span>`;
+document.getElementById('pathC2Text').innerHTML=txt;
+setWarmth(warmth+8);
+
+await new Promise(r=>setTimeout(r,2000));
+const btn=document.createElement('button');btn.className='btn';btn.textContent='Continue';
+btn.onclick=()=>goToInterlude();
+document.getElementById('pathC2').appendChild(btn);
+}
+
+// ========== INTERLUDE ==========
+function goToInterlude(){
+goToScene('interlude');
+setTimeout(buildInterlude,600);
+}
+
+async function buildInterlude(){
+const txt=`Later, when Papa Bear was washing the bowls, Clover and Pip whispered under the paper stars.\n\nPip said, <span class="dialogue">"I still wish the cabin were bigger."</span>\n\nClover nodded.\n<span class="dialogue">"Me too."</span>\n\nPip pulled the blanket to her chin.\n<span class="dialogue">"But he remembered the ducks."</span>\n\n<span class="dialogue">"And the soup,"</span> said Clover.\n\n<span class="dialogue">"And the stars."</span>\n\n<span class="dialogue">"And the cups."</span>\n\nPip was quiet for a while.\n\nThen she said:\n\n<span class="dialogue">"Do you think Papa thinks about us when we are not here?"</span>\n\nClover looked at the two lanterns in the window.\n\n<span class="dialogue">"I think,"</span> she whispered, <span class="dialogue">"that is why the lanterns are already lit."</span>`;
+document.getElementById('interludeText').innerHTML=txt;
+
+await new Promise(r=>setTimeout(r,1500));
+const choices=document.getElementById('interludeChoices');choices.style.display='flex';
+choices.innerHTML='<p style="text-align:center;color:var(--amber);font-style:italic">What should Pip whisper back?</p>';
+[{text:'"Maybe."',fn:()=>interludeChoice(1)},
+{text:'"I did not know he did all that."',fn:()=>interludeChoice(2)},
+{text:'"Tomorrow, maybe we can do something for him."',fn:()=>interludeChoice(3)}
+].forEach(o=>{const b=document.createElement('button');b.className='choice-btn';b.textContent=o.text;b.onclick=o.fn;choices.appendChild(b)});
+}
+
+function interludeChoice(n){
+document.getElementById('interludeChoices').style.display='none';
+const res=document.getElementById('interludeResult');res.style.display='block';
+let h='<div class="narration" style="animation:fadeSlideIn 1s ease">';
+if(n===1){
+h+=`<p>Pip whispers, <span class="dialogue">"Maybe."</span></p><p>But she looked at the lanterns for a long time before she closed her eyes.</p>`;
+setWarmth(warmth+3);
+}else if(n===2){
+h+=`<p>Pip whispers, <span class="dialogue">"I did not know he did all that."</span></p><p>Clover nods.</p><p><span class="dialogue">"I think there is more we have not seen yet."</span></p>`;
+setWarmth(warmth+10);
+}else{
+h+=`<p>Pip whispers, <span class="dialogue">"Tomorrow, maybe we can do something for him."</span></p><p>Clover smiles in the dark.</p><p><span class="dialogue">"I think he would like that very much."</span></p><p>The lanterns in the window seemed to glow just a little brighter.</p>`;
+setWarmth(warmth+18);
+}
+h+=`<div style="text-align:center"><button class="btn" onclick="goToFinalDoors()">Continue</button></div></div>`;
+res.innerHTML=h;
+}
+
+// ========== FINAL DOORS ==========
+function goToFinalDoors(){
+goToScene('finalDoors');
+setTimeout(buildFinalDoors,600);
+}
+
+function buildFinalDoors(){
+let txt=`<p>By the end of the night, the cabin had not become bigger.</p>
+<p>The table was still small. The rug was still small. The sleeping corner was still small.</p>
+<p>But Clover and Pip had begun to see things they had not seen before.</p>
+<p>The soup that remembered. The boots by the fire. The cups on the shelf. The stars Papa Bear could reach. The ducks he had remembered. The lanterns he lit before they arrived.</p>
+<p>Then, in the golden light, four little doors appeared.</p>
+<p class="reflection">When love has been waiting quietly, how will you answer it?</p>`;
+document.getElementById('finalDoorsText').innerHTML=txt;
+
+const container=document.getElementById('endingDoorsContainer');
+container.innerHTML='';
+const doors=[
+{icon:'🤫',label:'Sit close to Papa Bear',id:1},
+{icon:'💛',label:'Tell Papa Bear what you noticed',id:2},
+{icon:'🥞',label:'Do something kind for Papa Bear',id:3},
+{icon:'🕊️',label:'Use softer words',id:4},
+];
+doors.forEach(d=>{
+const el=document.createElement('div');
+el.className='ending-door';
+el.innerHTML=`<div class="ed-icon">${d.icon}</div><div class="ed-label">${d.label}</div>`;
+el.onclick=()=>showEnding(d.id);
+container.appendChild(el);
+});
+}
+
+// ========== ENDINGS ==========
+function showEnding(n){
+goToScene('endingScene');
+setTimeout(()=>buildEnding(n),600);
+}
+
+function buildEnding(n){
+const ill=document.getElementById('endingIll');
+const txt=document.getElementById('endingText');
+const btns=document.getElementById('endingButtons');
+let h='';
+
+if(n===1){
+ill.innerHTML='<span>[ Cubs sitting close to Papa Bear by the fire ]</span>';
+h=`<p>Pip did not know what to say.</p><p>Clover did not know either.</p><p>So they did not say anything at first.</p>
+<p>They padded across the rug and sat beside Papa Bear.</p>
+<p>Papa Bear looked down.</p>
+<p><span class="dialogue">"Are you warm enough, little cubs?"</span></p>
+<p>Pip nodded.</p><p>Clover leaned against his arm.</p><p>Pip leaned against the other.</p>
+<p>Papa Bear became very still, as if he did not want to move too quickly and break the moment.</p>
+<p>The fire crackled. The lanterns glowed.</p>
+<p>The cabin was still little.</p><p>But now it felt full.</p>
+<p class="reflection">Sometimes love does not need a big speech.<br>Sometimes sitting close is the first thank-you.</p>`;
+setWarmth(90);
+}else if(n===2){
+ill.innerHTML='<span>[ Cubs pointing out all the things they noticed ]</span>';
+h=`<p>Pip looked at the soup pot.</p><p><span class="dialogue">"You remembered the carrots."</span></p>
+<p>Clover pointed to the boots.</p><p><span class="dialogue">"And you dried our boots."</span></p>
+<p>Pip looked up.</p><p><span class="dialogue">"You made the stars."</span></p>
+<p>Clover touched the little blue cup.</p><p><span class="dialogue">"And you kept our cups safe."</span></p>
+<p>Papa Bear's big paws rested on the table.</p><p>For a moment, he did not speak.</p>
+<p>Then he said softly:</p><p><span class="dialogue">"I tried."</span></p>
+<p>Pip stepped closer.</p><p><span class="dialogue">"I didn't see it before."</span></p>
+<p>Clover whispered:</p><p><span class="dialogue">"We see it now."</span></p>
+<p>Papa Bear's eyes shone like lantern glass.</p><p>He opened his arms.</p><p>The cubs ran into them.</p>
+<p class="reflection">A thank-you becomes powerful<br>when it names the love it noticed.</p>`;
+setWarmth(95);
+}else if(n===3){
+ill.innerHTML='<span>[ Cubs making a messy breakfast for Papa Bear ]</span>';
+h=`<p>The next morning, Papa Bear woke to a strange sound.</p>
+<p><em>Clink. Tap. Whisper.</em></p>
+<p>He opened one eye.</p>
+<p>Clover was folding napkins.</p><p>Pip was placing cups on the table.</p>
+<p>The honey jar was upside down, and one spoon was stuck to the floor.</p>
+<p>Papa Bear sat up.</p><p><span class="dialogue">"What is happening here?"</span></p>
+<p>Pip stood proudly.</p><p><span class="dialogue">"We are making breakfast."</span></p>
+<p>Clover added, <span class="dialogue">"Not perfect breakfast."</span></p>
+<p>Pip held up a pancake shaped like a boot.</p><p><span class="dialogue">"Special breakfast."</span></p>
+<p>Papa Bear laughed.</p><p>It was the kind of laugh that warmed the windows.</p>
+<p>The pancakes were lumpy. The table was sticky. The tea was too weak.</p>
+<p>But Papa Bear ate as if it were a feast in a palace.</p>
+<p class="reflection">Love grows when everyone gets to give something.</p>`;
+setWarmth(95);
+}else{
+ill.innerHTML='<span>[ Pip speaking softly to Papa Bear by the fire ]</span>';
+h=`<p><span class="dialogue">"Papa Bear?"</span></p>
+<p><span class="dialogue">"Yes, little cub?"</span></p>
+<p><span class="dialogue">"I said your cabin was too small."</span></p>
+<p>Papa Bear smiled gently.</p><p><span class="dialogue">"It is small."</span></p>
+<p>Pip shook her head.</p>
+<p><span class="dialogue">"But I said it with little teeth."</span></p>
+<p>The fire crackled.</p>
+<p><span class="dialogue">"I think I was missing other things,"</span> Pip said. <span class="dialogue">"But I made it sound like your cabin was the problem."</span></p>
+<p>Papa Bear knelt beside her.</p>
+<p><span class="dialogue">"Big feelings sometimes come out with little teeth."</span></p>
+<p>Pip's ears lowered.</p>
+<p><span class="dialogue">"I can try softer words."</span></p>
+<p>Papa Bear opened his arms.</p>
+<p><span class="dialogue">"That is a very brave try."</span></p>
+<p>Clover joined the hug.</p>
+<p>The lanterns in the window glowed brighter than they had all winter.</p>
+<p class="reflection">A soft word can turn a little room warm again.</p>`;
+setWarmth(98);
+}
+
+txt.innerHTML=h;
+txt.style.animation='fadeSlideIn 1.5s ease';
+
+btns.innerHTML=`
+<button class="btn" onclick="goToLanternMessage()" style="margin:0.3rem">Keep this ending</button>
+<button class="btn" onclick="goToFinalDoors()" style="margin:0.3rem;background:rgba(232,168,56,0.2);color:var(--amber-glow)">Choose another door</button>
+`;
+}
+
+// ========== LANTERN MESSAGE ==========
+function goToLanternMessage(){
+goToScene('lanternMessage');
+}
+
+function lightMyLantern(){
+const msgs=[
+document.getElementById('msg1').value,
+document.getElementById('msg2').value,
+document.getElementById('msg3').value
+].filter(m=>m.trim()).join(' ✦ ');
+
+if(!msgs){
+document.getElementById('msg1').style.borderColor='var(--fire-orange)';
+setTimeout(()=>document.getElementById('msg1').style.borderColor='rgba(232,168,56,0.25)',2000);
+return;
+}
+
+document.getElementById('userLanternMsg').textContent=msgs;
+document.getElementById('floatingLantern').style.display='block';
+document.getElementById('floatingLantern').style.animation='fadeSlideIn 1.5s ease, floatUp 3s ease-in-out infinite alternate';
+
+setTimeout(()=>{
+document.getElementById('finalNarrationText').style.display='block';
+document.getElementById('finalNarrationText').style.animation='fadeSlideIn 2s ease';
+setWarmth(100);
+},1500);
+
+setTimeout(()=>{
+document.getElementById('restartBtn').style.display='inline-block';
+document.getElementById('restartBtn').style.animation='fadeSlideIn 1s ease';
+},3500);
+}
+</script>
+</body>
+</html>
